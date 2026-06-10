@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Your Microsoft Excel Certificate | Aadhya Aspire Academy</title>
+  <meta name="description" content="View, download, and print your official Microsoft Excel Completion Certificate from Aadhya Aspire Academy.">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- html2pdf.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- Floating Background Blobs -->
+  <div class="bg-animations">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Top Sticky Header Navigation (hidden on print) -->
+  <header class="main-header">
+    <div class="header-container">
+      <a href="index.html" class="logo-link">
+        <img src="aadhya_logo.png" alt="Aadhya Aspire Academy Logo" class="logo-img">
+        <div class="logo-text-wrapper">
+          <span class="logo-text-academy">Aadhya Aspire</span>
+          <span class="logo-tagline">Academy</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <!-- Certificate View Body -->
+  <main class="certificate-page-main">
+    
+    <!-- Action buttons container (hidden on print) -->
+    <div class="certificate-actions-bar">
+      <button type="button" class="action-btn action-btn-primary" id="downloadPdfBtn">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+      </button>
+      <button type="button" class="action-btn action-btn-secondary" id="printCertBtn">
+        <i class="fa-solid fa-print"></i> Print Certificate
+      </button>
+      <a href="index.html" class="action-btn action-btn-outline" id="backBtn">
+        <i class="fa-solid fa-arrow-left"></i> Back to Form
+      </a>
+    </div>
+
+    <!-- The Premium Certificate Rendering Area -->
+    <div class="certificate-preview-container" id="certificateToPrint">
+      <div class="certificate-render-wrapper">
+        <!-- Certificate background template -->
+        <img src="certificate_template.jpeg?v=4" alt="Certificate of Completion Background" class="certificate-bg-image">
+        
+        <!-- Student Name dynamically overlayed (Centred in Presented-To section) -->
+        <div class="certificate-overlay-name" id="certStudentName">
+          Student Name
+        </div>
+        
+        <!-- Live Current Date block cover overlay (Bottom-Left Completion Date) -->
+        <div class="certificate-date-block-cover">
+          <span class="certificate-overlay-date" id="certIssueDate">
+            JUNE 10, 2026
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer (hidden on print) -->
+  <footer class="main-footer">
+    <div class="footer-content">
+      <p>&copy; 2026 Aadhya Aspire Academy. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Script for Certificate Logic -->
+  <script src="script.js"></script>
+</body>
+</html>

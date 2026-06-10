@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Microsoft Excel Certification Program | Aadhya Aspire Academy</title>
+  <meta name="description" content="Complete your 7-Day Microsoft Excel Training Program with Aadhya Aspire Academy and instantly generate, view, print, and download your official Certificate of Completion.">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Background Blobs -->
+  <div class="bg-animations">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Top Sticky Header Navigation -->
+  <header class="main-header" id="mainHeader">
+    <div class="header-container">
+      <a href="#mainHeader" class="logo-link" id="navLogo">
+        <img src="aadhya_logo.png" alt="Aadhya Aspire Academy Logo" class="logo-img">
+        <div class="logo-text-wrapper">
+          <span class="logo-text-academy">Aadhya Aspire</span>
+          <span class="logo-tagline">Academy</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <main class="landing-main">
+    
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-container">
+        
+        <!-- Left Column: Heading and CTAs -->
+        <div class="hero-content">
+          <div class="badge-tag">
+            <i class="fa-solid fa-award"></i> Official Microsoft Excel Certificate
+          </div>
+          <h1 class="hero-heading">
+            Microsoft Excel<br><span class="gradient-text">Certification Program</span>
+          </h1>
+          <p class="hero-subheading">
+            Complete your 7-Day Excel Training Certificate. Instantly verify, print, or download your official certificate of completion below.
+          </p>
+          <button type="button" class="hero-cta-btn" id="heroCtaBtn">
+            Generate Certificate <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+        
+        <!-- Right Column: Interactive Mockup -->
+        <div class="hero-visual">
+          <div class="mockup-card" id="mockupCard">
+            <img src="certificate_template.jpeg?v=4" alt="Aadhya Aspire Excel Certificate Preview" class="mockup-img">
+            <div class="mockup-overlay">
+              <div class="mockup-name-placeholder" id="mockupName">YOUR NAME HERE</div>
+            </div>
+            <div class="mockup-badge">
+              <i class="fa-solid fa-stamp"></i> Official Template
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Student Details Form Section -->
+    <section class="form-section" id="registration-form">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Student Registration Form</h2>
+          <p>Please enter your registration details to generate your Excel Training certificate.</p>
+        </div>
+        
+        <form id="certificateForm" novalidate>
+          
+          <!-- Name Field -->
+          <div class="form-group" id="groupStudentName">
+            <label for="studentName">Student Full Name</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user input-icon"></i>
+              <input 
+                type="text" 
+                id="studentName" 
+                name="studentName" 
+                placeholder="e.g. Jane Doe" 
+                required
+              >
+            </div>
+            <span class="validation-msg" id="errStudentName">Name is required and should contain only alphabets.</span>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group" id="groupStudentEmail">
+            <label for="studentEmail">Email Address</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-envelope input-icon"></i>
+              <input 
+                type="email" 
+                id="studentEmail" 
+                name="studentEmail" 
+                placeholder="e.g. jane.doe@example.com" 
+                required
+              >
+            </div>
+            <span class="validation-msg" id="errStudentEmail">Please enter a valid email address.</span>
+          </div>
+
+          <!-- Mobile Field -->
+          <div class="form-group" id="groupStudentMobile">
+            <label for="studentMobile">Mobile Number</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-phone input-icon"></i>
+              <input 
+                type="tel" 
+                id="studentMobile" 
+                name="studentMobile" 
+                placeholder="e.g. 9876543210" 
+                required
+              >
+            </div>
+            <span class="validation-msg" id="errStudentMobile">Please enter a valid 10-digit mobile number.</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="form-submit-btn" id="submitBtn">
+            Generate Certificate <i class="fa-solid fa-certificate"></i>
+          </button>
+
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Generating Certificate Loader Modal -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-card">
+      <div class="loader-spinner-wrapper">
+        <div class="loader-circle"></div>
+        <img src="aadhya_logo.png" alt="Aadhya Logo" class="loader-logo">
+      </div>
+      
+      <div class="loader-text">
+        <h3>Generating Certificate</h3>
+        <p>Please wait while we prepare your official document...</p>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="loader-progress-bar">
+        <div class="loader-progress-fill" id="loaderProgressFill"></div>
+      </div>
+
+      <!-- Animated Steps -->
+      <div class="loader-steps">
+        <div class="loader-step pending" id="step1">
+          <i class="fa-solid fa-circle-notch"></i>
+          <span>Validating student details...</span>
+        </div>
+        <div class="loader-step pending" id="step2">
+          <i class="fa-solid fa-circle-notch"></i>
+          <span>Compiling Excel certification credentials...</span>
+        </div>
+        <div class="loader-step pending" id="step3">
+          <i class="fa-solid fa-circle-notch"></i>
+          <span>Drawing print-ready layout canvas...</span>
+        </div>
+        <div class="loader-step pending" id="step4">
+          <i class="fa-solid fa-circle-notch"></i>
+          <span>Applying Chairman and Principal signatures...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="footer-content">
+      <p>&copy; 2026 Aadhya Aspire Academy. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#mainHeader">Back to Top</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms & Conditions</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Core Javascript -->
+  <script src="script.js"></script>
+</body>
+</html>
