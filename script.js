@@ -209,6 +209,12 @@ function initCertificatePage() {
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
   const printCertBtn = document.getElementById('printCertBtn');
 
+  // Ensure the background template image uses its absolute URL on load
+  const bgImg = document.querySelector('.certificate-bg-image');
+  if (bgImg) {
+    bgImg.src = bgImg.src;
+  }
+
   // Retrieve student details from sessionStorage
   let studentName = sessionStorage.getItem('cert_studentName');
 
@@ -241,50 +247,75 @@ function initCertificatePage() {
   if (downloadPdfBtn) {
     downloadPdfBtn.addEventListener('click', () => {
       const element = document.getElementById('certificateToPrint');
+      const img = element.querySelector('.certificate-bg-image');
       
+      // Disable buttons to prevent multiple clicks and show spinner loading
+      downloadPdfBtn.disabled = true;
+      downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
+
       // Setup option parameters for standard A4 landscape rendering
       const opt = {
         margin:       0,
         filename:     `Aadhya_Excel_Certificate_${studentName.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 1.0 }, // Opaque max-quality JPEG to prevent transparency blending & color profile fading
+        image:        { type: 'png' }, // Lossless PNG format to preserve exact contrast and color profiles
         html2canvas:  { 
           scale: 4.0, // High-fidelity scale for ultra-sharp canvas rendering
           useCORS: true, 
           logging: false,
           letterRendering: true,
-          backgroundColor: '#ffffff' // Solid white background to prevent transparency artifacts
+          backgroundColor: '#ffffff', // Solid white background to prevent transparency artifacts
+          imageTimeout: 0 // Wait indefinitely for images to load
         },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true }
       };
 
-      // Disable buttons to prevent multiple clicks and show spinner loading
-      downloadPdfBtn.disabled = true;
-      downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
+      const proceedWithCapture = () => {
+        // Temporarily apply the rendering layout override
+        element.classList.add('pdf-render-mode');
 
-      // Temporarily apply the rendering layout override
-      element.classList.add('pdf-render-mode');
+        // Wait two animation frames to allow browser layout calculation & paint of the resized container
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Compile html2pdf worker up to canvas step, then immediately restore DOM styles
+            const worker = html2pdf().set(opt).from(element).toContainer().toCanvas();
+            
+            worker.then(() => {
+              // Swap back to responsive styles in the next frame
+              element.classList.remove('pdf-render-mode');
+            });
 
-      // Compile html2pdf worker up to canvas step, then immediately restore DOM styles
-      const worker = html2pdf().set(opt).from(element).toContainer().toCanvas();
-      
-      worker.then(() => {
-        // Swap back to responsive styles in the next frame
-        element.classList.remove('pdf-render-mode');
-      });
+            // Continue processing the PDF output asynchronously
+            worker.toImg().toPdf().save().then(() => {
+              downloadPdfBtn.disabled = false;
+              downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+            }).catch(err => {
+              console.error('PDF Generation Error:', err);
+              element.classList.remove('pdf-render-mode');
+              
+              alert('There was a problem generating the PDF. Opening browser Print dialog instead.');
+              window.print();
+              downloadPdfBtn.disabled = false;
+              downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+            });
+          });
+        });
+      };
 
-      // Continue processing the PDF output asynchronously
-      worker.toImg().toPdf().save().then(() => {
-        downloadPdfBtn.disabled = false;
-        downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
-      }).catch(err => {
-        console.error('PDF Generation Error:', err);
-        element.classList.remove('pdf-render-mode');
-        
-        alert('There was a problem generating the PDF. Opening browser Print dialog instead.');
-        window.print();
-        downloadPdfBtn.disabled = false;
-        downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
-      });
+      // Check if image is fully loaded and decoded in memory before capturing
+      if (img) {
+        if (img.complete) {
+          if (typeof img.decode === 'function') {
+            img.decode().then(proceedWithCapture).catch(proceedWithCapture);
+          } else {
+            proceedWithCapture();
+          }
+        } else {
+          img.onload = proceedWithCapture;
+          img.onerror = proceedWithCapture;
+        }
+      } else {
+        proceedWithCapture();
+      }
     });
   }
 
