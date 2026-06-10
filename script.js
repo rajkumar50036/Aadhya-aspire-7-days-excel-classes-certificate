@@ -243,8 +243,6 @@ function initCertificatePage() {
     dateOverlay.textContent = formattedDate;
   }
 
-  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-
   // 3. Download PDF Action (using Canvas 2D + jsPDF client-side)
   if (downloadPdfBtn) {
     downloadPdfBtn.addEventListener('click', () => {
