@@ -243,30 +243,26 @@ function initCertificatePage() {
     dateOverlay.textContent = formattedDate;
   }
 
-  // 3. Download PDF Action (using html2pdf.js client-side)
-  if (downloadPdfBtn) {
-    downloadPdfBtn.addEventListener('click', () => {
+  const saveImageBtn = document.getElementById('saveImageBtn');
+
+  // 3. Save Image Action (using html2canvas client-side)
+  if (saveImageBtn) {
+    saveImageBtn.addEventListener('click', () => {
       const element = document.getElementById('certificateToPrint');
       const img = element.querySelector('.certificate-bg-image');
       
       // Disable buttons to prevent multiple clicks and show spinner loading
-      downloadPdfBtn.disabled = true;
-      downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Downloading...';
+      saveImageBtn.disabled = true;
+      saveImageBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
-      // Setup option parameters for standard A4 landscape rendering
-      const opt = {
-        margin:       0,
-        filename:     `Aadhya_Excel_Certificate_${studentName.replace(/\s+/g, '_')}.pdf`,
-        image:        { type: 'png' }, // Lossless PNG format to preserve exact contrast and color profiles
-        html2canvas:  { 
-          scale: 4.0, // High-fidelity scale for ultra-sharp canvas rendering
-          useCORS: true, 
-          logging: false,
-          letterRendering: true,
-          backgroundColor: '#ffffff', // Solid white background to prevent transparency artifacts
-          imageTimeout: 0 // Wait indefinitely for images to load
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true }
+      // Setup html2canvas parameters
+      const html2canvasOptions = { 
+        scale: 4.0, // High-fidelity scale for ultra-sharp canvas rendering
+        useCORS: true, 
+        logging: false,
+        letterRendering: true,
+        backgroundColor: '#ffffff', // Solid white background to prevent transparency artifacts
+        imageTimeout: 0 // Wait indefinitely for images to load
       };
 
       const proceedWithCapture = () => {
@@ -276,26 +272,41 @@ function initCertificatePage() {
         // Wait two animation frames to allow browser layout calculation & paint of the resized container
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            // Compile html2pdf worker up to canvas step, then immediately restore DOM styles
-            const worker = html2pdf().set(opt).from(element).toContainer().toCanvas();
-            
-            worker.then(() => {
-              // Swap back to responsive styles in the next frame
+            // Render DOM to canvas
+            html2canvas(element, html2canvasOptions).then(canvas => {
+              // Immediately restore responsive DOM styles
               element.classList.remove('pdf-render-mode');
-            });
 
-            // Continue processing the PDF output asynchronously
-            worker.toImg().toPdf().save().then(() => {
-              downloadPdfBtn.disabled = false;
-              downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+              // Convert canvas to lossless PNG blob/dataURL and trigger download
+              try {
+                // Get PNG Data URL
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Create a temporary link element to trigger downloading
+                const link = document.createElement('a');
+                link.download = `Aadhya_Excel_Certificate_${studentName.replace(/\s+/g, '_')}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Reset button state
+                saveImageBtn.disabled = false;
+                saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
+              } catch (err) {
+                console.error('Image Generation Error:', err);
+                alert('There was a problem generating the image file. Opening browser Print dialog instead.');
+                window.print();
+                saveImageBtn.disabled = false;
+                saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
+              }
             }).catch(err => {
-              console.error('PDF Generation Error:', err);
+              console.error('html2canvas Error:', err);
               element.classList.remove('pdf-render-mode');
-              
-              alert('There was a problem generating the PDF. Opening browser Print dialog instead.');
+              alert('There was a problem generating the image. Opening browser Print dialog instead.');
               window.print();
-              downloadPdfBtn.disabled = false;
-              downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+              saveImageBtn.disabled = false;
+              saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
             });
           });
         });
