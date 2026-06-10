@@ -243,90 +243,116 @@ function initCertificatePage() {
     dateOverlay.textContent = formattedDate;
   }
 
-  const saveImageBtn = document.getElementById('saveImageBtn');
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 
-  // 3. Save Image Action (using html2canvas client-side)
-  if (saveImageBtn) {
-    saveImageBtn.addEventListener('click', () => {
-      const element = document.getElementById('certificateToPrint');
-      const img = element.querySelector('.certificate-bg-image');
+  // 3. Download PDF Action (using Canvas 2D + jsPDF client-side)
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+      const bgImg = document.querySelector('.certificate-bg-image');
       
       // Disable buttons to prevent multiple clicks and show spinner loading
-      saveImageBtn.disabled = true;
-      saveImageBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+      downloadPdfBtn.disabled = true;
+      downloadPdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
 
-      // Setup html2canvas parameters
-      const html2canvasOptions = { 
-        scale: 4.0, // High-fidelity scale for ultra-sharp canvas rendering
-        useCORS: true, 
-        logging: false,
-        letterRendering: true,
-        backgroundColor: '#ffffff', // Solid white background to prevent transparency artifacts
-        imageTimeout: 0 // Wait indefinitely for images to load
-      };
+      const proceedWithPDF = () => {
+        try {
+          // Native dimensions of the template image
+          const nativeWidth = 1492;
+          const nativeHeight = 1054;
+          const scale = 2.0; // 2x scale for ultra-sharp 300+ DPI text and vector rendering
 
-      const proceedWithCapture = () => {
-        // Temporarily apply the rendering layout override
-        element.classList.add('pdf-render-mode');
+          // Create an offscreen canvas
+          const canvas = document.createElement('canvas');
+          canvas.width = nativeWidth * scale;
+          canvas.height = nativeHeight * scale;
+          const ctx = canvas.getContext('2d');
 
-        // Wait two animation frames to allow browser layout calculation & paint of the resized container
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            // Render DOM to canvas
-            html2canvas(element, html2canvasOptions).then(canvas => {
-              // Immediately restore responsive DOM styles
-              element.classList.remove('pdf-render-mode');
+          // Scale all drawing coordinates by 2x
+          ctx.scale(scale, scale);
 
-              // Convert canvas to lossless PNG blob/dataURL and trigger download
-              try {
-                // Get PNG Data URL
-                const dataUrl = canvas.toDataURL('image/png');
-                
-                // Create a temporary link element to trigger downloading
-                const link = document.createElement('a');
-                link.download = `Aadhya_Excel_Certificate_${studentName.replace(/\s+/g, '_')}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+          // 1. Draw the background certificate template image
+          ctx.drawImage(bgImg, 0, 0, nativeWidth, nativeHeight);
 
-                // Reset button state
-                saveImageBtn.disabled = false;
-                saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
-              } catch (err) {
-                console.error('Image Generation Error:', err);
-                alert('There was a problem generating the image file. Opening browser Print dialog instead.');
-                window.print();
-                saveImageBtn.disabled = false;
-                saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
-              }
-            }).catch(err => {
-              console.error('html2canvas Error:', err);
-              element.classList.remove('pdf-render-mode');
-              alert('There was a problem generating the image. Opening browser Print dialog instead.');
-              window.print();
-              saveImageBtn.disabled = false;
-              saveImageBtn.innerHTML = '<i class="fa-solid fa-image"></i> Save Image';
-            });
+          // 2. Cover the original completion date with color-matched block
+          // Color: #FAF6ED, Coordinates: left: 12.3%, top: 94.6%, width: 13.0%, height: 3.0%
+          const dateX = nativeWidth * 0.123;
+          const dateY = nativeHeight * 0.946;
+          const dateW = nativeWidth * 0.130;
+          const dateH = nativeHeight * 0.030;
+          
+          ctx.fillStyle = '#FAF6ED';
+          ctx.fillRect(dateX, dateY, dateW, dateH);
+
+          // 3. Draw the dynamic live issue date inside the cover block
+          // Font styling: bold 16px Inter, Color: #1a1e26
+          ctx.font = "700 15.5px 'Inter', sans-serif";
+          ctx.fillStyle = '#1a1e26';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(formattedDate, dateX, dateY + (dateH / 2));
+
+          // 4. Draw the student's name in uppercase
+          // Font styling: italic 600 57px Playfair Display, Color: #0c1c38
+          ctx.font = "italic 600 57px 'Playfair Display', serif";
+          ctx.fillStyle = '#0c1c38';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          const nameX = nativeWidth * 0.5;
+          const nameY = nativeHeight * 0.515;
+          ctx.fillText(studentName.toUpperCase(), nameX, nameY);
+
+          // 5. Generate PDF using jsPDF
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
           });
-        });
+
+          // Convert canvas to base64 JPEG data URL at maximum quality (0.98)
+          // Since the background color is solid white, JPEG has no transparency issues and has great contrast.
+          const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+          // Add image to cover the entire landscape A4 page (297mm x 210mm)
+          doc.addImage(imgData, 'JPEG', 0, 0, 297, 210);
+          
+          // Save the PDF
+          const safeName = studentName.replace(/\s+/g, '_');
+          doc.save(`Aadhya_Excel_Certificate_${safeName}.pdf`);
+
+          // Reset button state
+          downloadPdfBtn.disabled = false;
+          downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+        } catch (err) {
+          console.error('PDF Generation Error:', err);
+          alert('There was a problem generating the PDF. Opening browser Print dialog instead.');
+          window.print();
+          
+          // Reset button state
+          downloadPdfBtn.disabled = false;
+          downloadPdfBtn.innerHTML = '<i class="fa-solid fa-file-pdf"></i> Download PDF';
+        }
       };
 
-      // Check if image is fully loaded and decoded in memory before capturing
-      if (img) {
-        if (img.complete) {
-          if (typeof img.decode === 'function') {
-            img.decode().then(proceedWithCapture).catch(proceedWithCapture);
+      // Ensure that Google Fonts are fully loaded before rendering to canvas
+      document.fonts.ready.then(() => {
+        if (bgImg) {
+          if (bgImg.complete) {
+            if (typeof bgImg.decode === 'function') {
+              bgImg.decode().then(proceedWithPDF).catch(proceedWithPDF);
+            } else {
+              proceedWithPDF();
+            }
           } else {
-            proceedWithCapture();
+            bgImg.onload = proceedWithPDF;
+            bgImg.onerror = proceedWithPDF;
           }
         } else {
-          img.onload = proceedWithCapture;
-          img.onerror = proceedWithCapture;
+          proceedWithPDF();
         }
-      } else {
-        proceedWithCapture();
-      }
+      });
     });
   }
 
